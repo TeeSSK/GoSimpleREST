@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/TeeSSK/GoSimpleREST/models"
+	"github.com/TeeSSK/GoSimpleREST/model"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
 var DB *gorm.DB
 
-func Connect() {
+func Connect() *gorm.DB {
 	host := os.Getenv("DB_HOST")
 	user := os.Getenv("DB_USER")
 	password := os.Getenv("DB_PASSWORD")
@@ -23,6 +23,7 @@ func Connect() {
 	if err != nil {
 		panic("failed to connect to database")
 	}
-	db.AutoMigrate(&models.User{})
+	db.AutoMigrate(&model.User{})
 	DB = db
+	return db
 }
