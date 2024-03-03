@@ -1,6 +1,9 @@
 package routes
 
 import (
+	"fmt"
+	"strconv"
+
 	"github.com/TeeSSK/GoSimpleREST/model"
 	services "github.com/TeeSSK/GoSimpleREST/services"
 	"github.com/gin-gonic/gin"
@@ -15,11 +18,11 @@ func NewUserRoutes(userService services.UserService) *UserRoutes {
 }
 
 func (r *UserRoutes) SetupRoutes(router *gin.Engine) {
-	userGroup := router.Group("/users")
+	userGroup := router.Group("/user")
 	{
 		userGroup.GET("/", r.GetUsers)
 		userGroup.GET("/:id", r.GetUserById)
-		userGroup.POST("/:id", r.CreateUser)
+		userGroup.POST("/", r.CreateUser)
 		userGroup.PUT("/:id", r.UpdateUser)
 		userGroup.DELETE("/:id", r.DeleteUser)
 	}
@@ -27,6 +30,8 @@ func (r *UserRoutes) SetupRoutes(router *gin.Engine) {
 
 func (r *UserRoutes) GetUsers(c *gin.Context) {
 	users, err := r.userService.GetUsers()
+	fmt.Println("GetUsers")
+	fmt.Println(users)
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
@@ -36,7 +41,8 @@ func (r *UserRoutes) GetUsers(c *gin.Context) {
 
 func (r *UserRoutes) GetUserById(c *gin.Context) {
 	id := c.Param("id")
-	user, err := r.userService.GetUserById(id)
+	uintId, _ := strconv.ParseUint(id, 10, 32)
+	user, err := r.userService.GetUserById(uint(uintId))
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
@@ -46,6 +52,7 @@ func (r *UserRoutes) GetUserById(c *gin.Context) {
 
 func (r *UserRoutes) CreateUser(c *gin.Context) {
 	var request model.CreateUserRequest
+	fmt.Println("CreateUser")
 	if err := c.BindJSON(&request); err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
@@ -60,12 +67,13 @@ func (r *UserRoutes) CreateUser(c *gin.Context) {
 
 func (r *UserRoutes) UpdateUser(c *gin.Context) {
 	id := c.Param("id")
+	uintId, _ := strconv.ParseUint(id, 10, 32)
 	var request model.UpdateUserRequest
 	if err := c.BindJSON(&request); err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
-	user, err := r.userService.UpdateUser(id, request)
+	user, err := r.userService.UpdateUser(uint(uintId), request)
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
@@ -75,7 +83,8 @@ func (r *UserRoutes) UpdateUser(c *gin.Context) {
 
 func (r *UserRoutes) DeleteUser(c *gin.Context) {
 	id := c.Param("id")
-	user, err := r.userService.DeleteUser(id)
+	uintId, _ := strconv.ParseUint(id, 10, 32)
+	user, err := r.userService.DeleteUser(uint(uintId))
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
